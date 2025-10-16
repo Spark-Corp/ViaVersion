@@ -99,7 +99,7 @@ public class ViaVersionPlugin extends JavaPlugin implements ViaPlatform<Player> 
     public void onEnable() {
         final ViaManagerImpl manager = (ViaManagerImpl) Via.getManager();
 
-        autoUpdater = new AutoUpdater(new File(".", "ViaVersion.jar"));
+        autoUpdater = new AutoUpdater(new File(".", "viaversion.jar"));
 
         // Spark - start
 
