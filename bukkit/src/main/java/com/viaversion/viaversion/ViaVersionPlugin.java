@@ -37,7 +37,9 @@ import com.viaversion.viaversion.bukkit.platform.PaperViaInjector;
 import com.viaversion.viaversion.dump.PluginInfo;
 import com.viaversion.viaversion.unsupported.UnsupportedPlugin;
 import com.viaversion.viaversion.unsupported.UnsupportedServerSoftware;
+import com.viaversion.viaversion.updater.AutoUpdater;
 import com.viaversion.viaversion.util.GsonUtil;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -63,6 +65,9 @@ public class ViaVersionPlugin extends JavaPlugin implements ViaPlatform<Player> 
     private final BukkitViaConfig conf;
     private final ViaAPI<Player> api = new BukkitViaAPI();
     private boolean lateBind;
+
+    // Spark
+    private static AutoUpdater autoUpdater;
 
     public ViaVersionPlugin() {
         instance = this;
@@ -93,6 +98,26 @@ public class ViaVersionPlugin extends JavaPlugin implements ViaPlatform<Player> 
     @Override
     public void onEnable() {
         final ViaManagerImpl manager = (ViaManagerImpl) Via.getManager();
+
+        autoUpdater = new AutoUpdater(new File(".", "ViaVersion.jar"));
+
+        // Spark - start
+
+        if (autoUpdater.verify()) {
+
+            System.out.println("New Via version detected, just restarting...");
+
+            try {
+                Thread.sleep(3000L);
+            } catch (InterruptedException e) {
+                return;
+            }
+
+            return;
+        }
+
+        // Spark - end
+
         if (lateBind) {
             getLogger().info("Registering protocol transformers and injecting...");
             manager.init();
