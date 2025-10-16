@@ -85,6 +85,13 @@ public class ViaVersionPlugin extends JavaPlugin implements ViaPlatform<Player> 
 
     @Override
     public void onLoad() {
+
+        autoUpdater = new AutoUpdater(super.getFile());
+
+        if (autoUpdater.verify(Bukkit::shutdown)) {
+            return;
+        }
+
         lateBind = !((BukkitViaInjector) Via.getManager().getInjector()).isBinded();
 
         if (!lateBind) {
@@ -99,24 +106,9 @@ public class ViaVersionPlugin extends JavaPlugin implements ViaPlatform<Player> 
     public void onEnable() {
         final ViaManagerImpl manager = (ViaManagerImpl) Via.getManager();
 
-        autoUpdater = new AutoUpdater(new File(".", "viaversion.jar"));
-
-        // Spark - start
-
-        if (autoUpdater.verify()) {
-
-            System.out.println("New Via version detected, just restarting...");
-
-            try {
-                Thread.sleep(3000L);
-            } catch (InterruptedException e) {
-                return;
-            }
-
+        if (autoUpdater.isUpdated()) {
             return;
         }
-
-        // Spark - end
 
         if (lateBind) {
             getLogger().info("Registering protocol transformers and injecting...");
