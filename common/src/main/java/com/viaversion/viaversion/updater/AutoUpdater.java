@@ -40,7 +40,7 @@ public class AutoUpdater {
             update();
             return true;
         } else {
-            System.out.println("No Paper X updates found!");
+            System.out.println("No Via updates found!");
         }
 
         return false;
