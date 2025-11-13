@@ -20,51 +20,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.viaversion.viaversion.api.minecraft;
+package com.viaversion.viaversion.api.type.types.misc;
 
+import com.viaversion.viaversion.api.minecraft.RegistryKey;
+import com.viaversion.viaversion.api.minecraft.codec.Ops;
+import com.viaversion.viaversion.api.type.Types;
+import com.viaversion.viaversion.api.type.types.VarIntType;
 import com.viaversion.viaversion.util.Key;
-import java.util.HashMap;
-import java.util.Map;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
-public enum RegistryType implements RegistryKey {
+public final class RegistryValueType extends VarIntType implements RegistryKey {
 
-    BLOCK("block"),
-    ITEM("item"),
-    FLUID("fluid"),
-    ENTITY("entity_type"),
-    GAME_EVENT("game_event"),
-    ENCHANTMENT("enchantment");
+    private final Key key;
+    private final String[] names;
 
-    private static final Map<String, RegistryType> MAP = new HashMap<>();
-    private static final RegistryType[] VALUES = values();
-
-    static {
-        for (RegistryType type : getValues()) {
-            MAP.put(type.resourceLocation, type);
+    public RegistryValueType(final Key key, final String... names) {
+        this.key = key;
+        this.names = names;
+        for (int i = 0; i < names.length; i++) {
+            names[i] = Key.namespaced(names[i]);
         }
     }
 
-    public static RegistryType[] getValues() {
-        return VALUES;
+    @Override
+    public void write(final Ops ops, final Integer value) {
+        Types.RESOURCE_LOCATION.write(ops, Key.of(names[value]));
     }
 
-    public static @Nullable RegistryType getByKey(String resourceKey) {
-        return MAP.get(resourceKey);
+    public String[] names() {
+        return names;
     }
 
-    private final String resourceLocation;
-
-    RegistryType(final String resourceLocation) {
-        this.resourceLocation = resourceLocation;
-    }
-
-    public String resourceLocation() {
-        return resourceLocation;
+    public String byId(final int id) {
+        return names[id];
     }
 
     @Override
     public Key key() {
-        return Key.of(resourceLocation);
+        return key;
     }
 }

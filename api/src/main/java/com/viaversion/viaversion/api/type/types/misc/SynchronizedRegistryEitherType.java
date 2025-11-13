@@ -20,51 +20,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.viaversion.viaversion.api.minecraft;
+package com.viaversion.viaversion.api.type.types.misc;
 
+import com.viaversion.viaversion.api.minecraft.RegistryKey;
+import com.viaversion.viaversion.api.minecraft.codec.Ops;
+import com.viaversion.viaversion.api.type.Types;
+import com.viaversion.viaversion.api.type.types.EitherType;
+import com.viaversion.viaversion.util.Either;
 import com.viaversion.viaversion.util.Key;
-import java.util.HashMap;
-import java.util.Map;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
-public enum RegistryType implements RegistryKey {
+// ???
+public final class SynchronizedRegistryEitherType extends EitherType<Integer, String> {
 
-    BLOCK("block"),
-    ITEM("item"),
-    FLUID("fluid"),
-    ENTITY("entity_type"),
-    GAME_EVENT("game_event"),
-    ENCHANTMENT("enchantment");
+    private final RegistryKey registryKey;
 
-    private static final Map<String, RegistryType> MAP = new HashMap<>();
-    private static final RegistryType[] VALUES = values();
-
-    static {
-        for (RegistryType type : getValues()) {
-            MAP.put(type.resourceLocation, type);
-        }
-    }
-
-    public static RegistryType[] getValues() {
-        return VALUES;
-    }
-
-    public static @Nullable RegistryType getByKey(String resourceKey) {
-        return MAP.get(resourceKey);
-    }
-
-    private final String resourceLocation;
-
-    RegistryType(final String resourceLocation) {
-        this.resourceLocation = resourceLocation;
-    }
-
-    public String resourceLocation() {
-        return resourceLocation;
+    public SynchronizedRegistryEitherType(final RegistryKey registryKey) {
+        super(Types.VAR_INT, Types.STRING);
+        this.registryKey = registryKey;
     }
 
     @Override
-    public Key key() {
-        return Key.of(resourceLocation);
+    public void write(final Ops ops, final Either<Integer, String> value) {
+        if (value.isLeft()) {
+            final Key key = ops.context().registryAccess().registryKey(this.registryKey.key().toString(), value.left());
+            Types.RESOURCE_LOCATION.write(ops, key);
+        } else {
+            Types.RESOURCE_LOCATION.write(ops, Key.of(value.right()));
+        }
     }
 }

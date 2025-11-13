@@ -242,19 +242,26 @@ public class RegistryDataRewriter implements com.viaversion.viaversion.api.rewri
 
     private void updateNestedEffect(final CompoundTag effectsTag) {
         final CompoundTag effect = effectsTag.getCompoundTag("effect");
-        if (effect == null) {
-            return;
+        if (effect != null) {
+            runEffectRewriters(effect);
+
+            final ListTag<CompoundTag> innerEffects = effect.getListTag("effects", CompoundTag.class);
+            if (innerEffects != null) {
+                for (final CompoundTag innerEffect : innerEffects) {
+                    runEffectRewriters(innerEffect);
+                }
+            }
         }
 
-        runEffectRewriters(effect);
-
-        final ListTag<CompoundTag> innerEffects = effect.getListTag("effects", CompoundTag.class);
-        if (innerEffects == null) {
-            return;
-        }
-
-        for (final CompoundTag innerEffect : innerEffects) {
-            runEffectRewriters(innerEffect);
+        final CompoundTag requirements = effectsTag.getCompoundTag("requirements");
+        final ListTag<CompoundTag> terms;
+        if (requirements != null && (terms = requirements.getListTag("terms", CompoundTag.class)) != null) {
+            for (final CompoundTag term : terms) {
+                final CompoundTag predicate = term.getCompoundTag("predicate");
+                if (predicate != null && Key.equals(term.getString("condition"), "entity_properties")) {
+                    updateType(predicate, "type", protocol.getMappingData().getEntityMappings());
+                }
+            }
         }
     }
 
@@ -327,5 +334,9 @@ public class RegistryDataRewriter implements com.viaversion.viaversion.api.rewri
     @Override
     public @Nullable KeyMappings getMappings(final String registryKey) {
         return this.registryKeyMappings.get(Key.stripMinecraftNamespace(registryKey));
+    }
+
+    public Map<String, KeyMappings> registryKeyMappings() {
+        return registryKeyMappings;
     }
 }
